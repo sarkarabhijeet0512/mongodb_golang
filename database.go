@@ -23,13 +23,13 @@ func createnew() interface{} {
 	var name, dob, home string
 	var age int
 
-	fmt.Print("Enter name: ")
+	fmt.Println("Enter name: ")
 	fmt.Scan(&name)
-	fmt.Print("Enter age: ")
+	fmt.Println("Enter age: ")
 	fmt.Scan(&age)
-	fmt.Print("Enter date of birth (dd-mm-yyyy format): ")
+	fmt.Println("Enter date of birth (dd-mm-yyyy format): ")
 	fmt.Scan(&dob)
-	fmt.Print("Enter your hometown: ")
+	fmt.Println("Enter your hometown: ")
 	fmt.Scan(&home)
 
 	people := user{Name: name, Age: age, Dob: dob, City: home}
@@ -132,24 +132,24 @@ func search(client *mongo.Client, collection *mongo.Collection) {
 
 func update(client *mongo.Client, collection *mongo.Collection) {
 	var objID string
-	var change user
+	var people user
 	fmt.Println("Enter the id of the person: ")
 	fmt.Scan(&objID)
 	id, _ := primitive.ObjectIDFromHex(objID)
 	result := collection.FindOne(context.TODO(), bson.M{"_id": id})
-	result.Decode(&change)
-	if change.Age != 0 {
-		fmt.Println(change, " found successfully")
-		change = updaterequire(change)
-		collection.UpdateOne(context.TODO(), bson.M{"_id": id}, change)
-		fmt.Println(change, "updated successfully")
+	result.Decode(&people)
+	if people.Age != 0 {
+		fmt.Println(people, " found successfully")
+		people = updaterequire(client, collection, people)
+		collection.UpdateOne(context.TODO(), bson.M{"_id": id}, people)
+		fmt.Println(people, "updated successfully")
 	} else {
 		fmt.Println("Enter valid id")
 	}
 	db(client)
 }
 
-func updaterequire(person user) user {
+func updaterequire(client *mongo.Client, collection *mongo.Collection, person user) user {
 	var name, dob, home string
 	var age int
 	var field string
@@ -175,6 +175,9 @@ func updaterequire(person user) user {
 		fmt.Print("Enter new home: ")
 		fmt.Scan(&home)
 		person.City = home
+
+	default:
+		fmt.Println("enter valid values")
 	}
 	return person
 }
